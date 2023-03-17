@@ -1,13 +1,14 @@
 import axios, { AxiosResponse } from 'axios';
 import {API_NO_AUTH_URL, CLIENT_SECRET, CLIENT_ID} from '../configs/configs';
 import qs from 'qs';
+window.Buffer = window.Buffer || require('buffer').Buffer;
 
 const Axios = () => {
     return axios.create({
             baseURL: API_NO_AUTH_URL,
             headers: {
-                'Authorization': 'Basic' + (new Buffer(CLIENT_ID + ':' + CLIENT_SECRET).toString('base64')),
-                'Content-type': 'x-www-form-urlencoded'
+                'Authorization': 'Basic ' + (new Buffer(CLIENT_ID + ':' + CLIENT_SECRET).toString('base64')),
+                'Content-type': 'application/x-www-form-urlencoded'
             },
             timeout: 5000,
             withCredentials: true,
@@ -15,24 +16,23 @@ const Axios = () => {
     );
 };
 
-const getPromise = async (fnc: Promise<AxiosResponse<any, any>> | Promise<{ data: { data: any; resultCode: number|string; }; }>) => {
+const getPromise = async (fnc: Promise<any>) => {
     return new Promise((resolve, reject) =>
-        fnc
-            .then((resp: { data: { data: any; resultCode: any; }; }) => {
+        fnc.then((resp) => {
                 if (resp) {
-                    const dataObj = resp && resp.data.data;
-                    switch (resp.data.resultCode) {
+                    const dataObj = resp && resp.data;
+                    switch (resp.status) {
                         case 200:
-                            resolve({resultCode: resp.data.resultCode, ...dataObj});
+                            resolve({resultCode: resp.status, ...dataObj});
                             break;
                         case '-500':
-                            reject({resultCode: resp.data.resultCode, ...dataObj})
+                            reject({resultCode: resp.status, ...dataObj})
                             break;
                         case 510:
-                            resolve({resultCode: resp.data.resultCode, ...dataObj});
+                            resolve({resultCode: resp.status, ...dataObj});
                             break;
                         default:
-                            reject({resultCode: resp.data.resultCode, ...dataObj})
+                            reject({resultCode: resp.status, ...dataObj})
                     }
                 }
             })
@@ -66,7 +66,7 @@ export default function network()  {
     return {
         spotify() {
             return {
-                getToken: () => getPromise(noAuthRequest.post('/api/token', qs.stringify({grant_type: 'client_credentials'})))
+                getToken: () => getPromise(noAuthRequest.post('/api/token', qs.stringify({'grant_type': 'client_credentials'})))
             }
         }
     }

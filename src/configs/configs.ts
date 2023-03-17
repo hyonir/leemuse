@@ -9,8 +9,8 @@ import {
 import { DefaultSetting, Props } from '../ts/interfaces';
 
 export const API_NO_AUTH_URL = 'https://accounts.spotify.com';
-export const CLIENT_ID = process.env.CLIENT_ID;
-export const CLIENT_SECRET = process.env.CLIENT_SECRET;
+export const CLIENT_ID = process.env.REACT_APP_CLIENT_ID;
+export const CLIENT_SECRET = process.env.REACT_APP_CLIENT_SECRET;
 
 export const PROPS: Props = {
     title: 'LeeMuse'
